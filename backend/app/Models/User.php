@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Traits\HasNotificationPreferences;
+use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasName;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Ai\Concerns\HasConversations;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable implements HasName
+class User extends Authenticatable implements FilamentUser, HasName
 {
     use HasApiTokens, HasConversations, HasFactory, Notifiable, SoftDeletes;
     use HasNotificationPreferences;
@@ -121,6 +123,19 @@ class User extends Authenticatable implements HasName
     public function isAdmin(): bool
     {
         return $this->is_admin === true;
+    }
+
+    /**
+     * Who may open the Filament panel.
+     *
+     * Without this contract Filament falls back to `config('app.env') !== 'local'`
+     * and returns 403 to EVERY user — admins included — on any deployed
+     * environment. Declaring it makes admin access explicit and works the same
+     * locally and in production.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->isAdmin();
     }
 
     /**
