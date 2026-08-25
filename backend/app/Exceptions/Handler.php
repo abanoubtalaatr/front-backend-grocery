@@ -27,4 +27,17 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+    /**
+     * Everything under `api/*` answers JSON, whatever the client asked for.
+     *
+     * Without this the base handler falls back to `redirect()->guest(route('login'))`
+     * for unauthenticated requests. This app has no `login` route, so a browser
+     * hitting a protected API URL got a 500 (RouteNotFoundException) instead of
+     * a 401 — and the same fallback would turn other API errors into HTML.
+     */
+    protected function shouldReturnJson($request, Throwable $e): bool
+    {
+        return $request->is('api/*') || parent::shouldReturnJson($request, $e);
+    }
 }
