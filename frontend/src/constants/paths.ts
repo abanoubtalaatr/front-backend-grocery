@@ -1,0 +1,32 @@
+export const paths = {
+  splash: '/',
+  onboarding: '/onboarding',
+  login: '/login',
+  signUp: '/sign-up',
+  forgotPassword: '/forgot-password',
+  verifyOtp: '/verify-otp',
+  resetPassword: '/reset-password',
+  home: '/home',
+  categories: '/categories',
+  cart: '/cart',
+  checkout: '/checkout',
+  orderComplete: '/order-complete',
+  order: '/order',
+  chat: '/chat',
+  test: '/test',
+  /** Account area (nested routes under `/profile/...`) */
+  profile: '/profile',
+
+  /** Admin dashboard (nested routes under `/dashboard/...`, admin-only) */
+  dashboard: '/dashboard',
+  dashboardProducts: '/dashboard/products',
+  dashboardCategories: '/dashboard/categories',
+  dashboardOrders: '/dashboard/orders',
+  dashboardOrderDetail: '/dashboard/orders/:orderId',
+  dashboardOffers: '/dashboard/offers',
+  dashboardCustomers: '/dashboard/customers',
+  dashboardReviews: '/dashboard/reviews',
+  dashboardInbox: '/dashboard/inbox',
+  dashboardContent: '/dashboard/content',
+  dashboardSettings: '/dashboard/settings',
+} as const

@@ -1,0 +1,69 @@
+---
+description: Enforces the feature-folder architecture for all new features in this project
+alwaysApply: true
+---
+
+# Feature Folder Structure
+
+Every feature lives under `src/features/<feature-name>/`. No exceptions.
+
+## Required structure
+
+```
+src/features/<feature>/
+├── index.ts              ← barrel: only public exports consumed outside this feature
+├── types.ts              ← plain TypeScript types (no runtime code, no imports from zod)
+├── schema.ts             ← Zod schemas + inferred types (only used inside the feature)
+├── service.ts            ← all API calls (apiClient.*). No UI, no hooks.
+├── hooks/
+│   └── use<Feature>.ts   ← state orchestration (useQuery, useMutation, useState, useForm)
+└── components/
+    ├── <Feature>Page.tsx     ← composition only: wires hook → components. No logic.
+    ├── <Feature>Card.tsx
+    └── <Noun>Dialog.tsx
+```
+
+## Enforcement
+
+These rules are enforced by ESLint (`eslint.config.js`) — they will fail `npm run lint` and CI for **any IDE, any AI, any developer**:
+- `no-restricted-imports` → blocks deep imports from `src/pages/` into feature internals
+- `no-restricted-syntax` → blocks `useQuery`, `useMutation`, `useForm`, `useQueryClient` inside `src/pages/`
+
+Run `npm run lint` before every commit.
+
+## Rules
+
+### ✅ DO
+- Import between files inside the same feature using relative paths (`./schema`, `../types`)
+- Import a feature from outside using only its barrel: `@/features/addresses`
+- Keep `types.ts` zero-runtime (only `type` / `interface`, never `z.object`)
+- Keep `service.ts` free of React (no hooks, no state)
+- Keep page components free of `apiClient`, `useQuery`, `useMutation`
+- Export hook intent-named actions (`startCreate`, `closeForm`, `cancelDelete`) — never raw state setters (`setOpen`, `setDeletingId`)
+
+### ❌ NEVER
+- Put a feature's schema in `src/lib/validation/` — `lib/validation/` is for **shared cross-feature** schemas only (e.g. auth)
+- Put types, service, or hooks directly inside `src/pages/`
+- Import from deep inside another feature: `@/features/cart/store/cartSlice` ← use the barrel instead
+- Use `any` — always type Axios errors as `AxiosError<unknown>` and cast `response.data` explicitly
+
+## Example: adding a new "reviews" feature
+
+```
+src/features/reviews/
+├── index.ts
+├── types.ts          ← type Review = { id: string; rating: number; ... }
+├── schema.ts         ← export const createReviewSchema = z.object({ ... })
+├── service.ts        ← export const reviewService = { getAll, create, delete }
+├── hooks/
+│   └── useManageReviews.ts
+└── components/
+    ├── ReviewsPage.tsx
+    ├── ReviewCard.tsx
+    └── ReviewFormDialog.tsx
+```
+
+The page entry point stays in `src/pages/reviews/ReviewsPage.tsx` and imports **only** from the barrel:
+```ts
+import { ReviewsPage } from '@/features/reviews'
+```

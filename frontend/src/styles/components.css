@@ -1,0 +1,14 @@
+@layer components {
+  /** Vertical rule between flex items — tweak `h-*` / `bg-*` here */
+  .separator {
+    @apply h-8 w-px shrink-0 bg-grocery-200;
+  }
+
+  .active {
+    @apply bg-[#014162] text-white;
+  }
+  .loyalty-card {
+    @apply flex flex-col border border-black/20 rounded-lg p-4 w-1/4 text-center;
+  }
+}
+
