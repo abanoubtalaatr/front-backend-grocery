@@ -23,9 +23,16 @@ class EnsureUserIsAdmin
             return $next($request);
         }
 
-        // If user is authenticated, check if they are admin
-        if (auth()->check() && !auth()->user()->isAdmin()) {
-            abort(403, 'Unauthorized. Admin access required.');
+        // A signed-in non-admin used to get a bare 403 with no way out but
+        // clearing cookies. Sign them out and send them back to the login screen
+        // instead, so the panel is recoverable from the browser.
+        if (auth()->check() && ! auth()->user()->isAdmin()) {
+            auth()->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->to('/admin/login')
+                ->with('error', 'That account does not have admin access.');
         }
 
         // If user is not authenticated, let Filament's Authenticate middleware handle the redirect
